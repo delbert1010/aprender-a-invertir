@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruta de Inversiones · Serie 7 + Serie 66</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --tinta:#14213A;
+    --tinta-2:#1B294A;
+    --tinta-3:#2C3D62;
+    --papel:#F2F3F0;
+    --papel-pura:#FBFBF8;
+    --oro:#C8A04B;
+    --oro-claro:#E3C988;
+    --verde:#2E7D6B;
+    --verde-suave:#E6F0ED;
+    --rojo:#B5462F;
+    --rojo-suave:#F6E7E2;
+    --grafito:#2F3A49;
+    --grafito-2:#5E6878;
+    --linea:#E1E2DC;
+    --tinta-claro:#C3CDDE;
+    --tinta-tenue:#8C99B4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:var(--tinta);
+    color:var(--grafito);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+
+  /* ---------- Shell ---------- */
+  .app{display:grid;grid-template-columns:332px 1fr;min-height:100vh}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    background:var(--tinta);
+    border-right:1px solid var(--tinta-3);
+    position:sticky;top:0;height:100vh;overflow-y:auto;
+    padding:30px 24px 40px;
+  }
+  .marca{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+  .marca-logo{
+    font-family:'Fraunces',serif;font-weight:600;font-size:1.45rem;color:var(--papel);
+    letter-spacing:-.01em;line-height:1;
+  }
+  .marca-sub{
+    font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.18em;
+    color:var(--oro);text-transform:uppercase;
+  }
+  .marca-tag{
+    font-size:.78rem;color:var(--tinta-tenue);margin:2px 0 26px;
+  }
+
+  .barra-global{margin-bottom:28px}
+  .barra-global-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .barra-global-lab{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.16em;color:var(--tinta-tenue);text-transform:uppercase}
+  .barra-global-val{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--oro-claro)}
+  .barra-track{height:5px;background:var(--tinta-3);border-radius:99px;overflow:hidden}
+  .barra-fill{height:100%;background:linear-gradient(90deg,var(--oro),var(--oro-claro));border-radius:99px;width:0;transition:width .5s ease}
+
+  .nav-sec{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.18em;color:var(--tinta-tenue);text-transform:uppercase;margin:0 0 12px 4px}
+
+  .nav-item{
+    display:flex;align-items:flex-start;gap:13px;width:100%;text-align:left;
+    background:none;border:none;cursor:pointer;color:var(--tinta-claro);
+    padding:9px 10px;border-radius:9px;margin-bottom:1px;
+    transition:background .15s ease,color .15s ease;position:relative;
+  }
+  .nav-item:hover{background:var(--tinta-2)}
+  .nav-item.activo{background:var(--tinta-2)}
+  .nav-item.activo .ni-titulo{color:var(--papel)}
+  .nav-item:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
+
+  .ni-num{
+    font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;
+    min-width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--tinta-3);color:var(--tinta-tenue);flex-shrink:0;margin-top:1px;
+    transition:all .15s ease;
+  }
+  .nav-item.activo .ni-num{border-color:var(--oro);color:var(--oro)}
+  .nav-item.hecho .ni-num{background:var(--verde);border-color:var(--verde);color:#fff}
+  .ni-cuerpo{flex:1;min-width:0}
+  .ni-titulo{font-size:.86rem;font-weight:500;line-height:1.3;color:var(--tinta-claro)}
+  .ni-meta{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tinta-tenue);margin-top:3px;letter-spacing:.04em}
+  .nav-item.hecho .ni-meta::before{content:"✓ ";color:var(--verde)}
+
+  .nav-inicio{
+    display:flex;align-items:center;gap:11px;width:100%;text-align:left;cursor:pointer;
+    background:none;border:1px solid var(--tinta-3);color:var(--tinta-claro);
+    padding:11px 13px;border-radius:9px;margin-bottom:24px;font-size:.86rem;font-weight:500;
+    transition:all .15s ease;
+  }
+  .nav-inicio:hover{background:var(--tinta-2);border-color:var(--oro)}
+  .nav-inicio.activo{background:var(--tinta-2);border-color:var(--oro);color:var(--papel)}
+  .nav-inicio:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
+
+  /* ---------- Topbar (móvil) ---------- */
+  .topbar{display:none}
+
+  /* ---------- Contenido ---------- */
+  .content{padding:48px 40px 90px;min-width:0}
+  .pane{max-width:768px;margin:0 auto}
+
+  .card{
+    background:var(--papel-pura);border:1px solid var(--linea);border-radius:16px;
+    padding:40px 44px;box-shadow:0 1px 0 rgba(20,33,58,.04);
+  }
+  .anim{animation:subir .4s cubic-bezier(.2,.7,.3,1)}
+  @keyframes subir{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.2em;color:var(--oro);text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .eyebrow::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--oro),transparent)}
+
+  h1.tit{font-family:'Fraunces',serif;font-weight:600;font-size:2.5rem;line-height:1.08;letter-spacing:-.02em;color:var(--tinta);margin-bottom:14px}
+  h2.tit{font-family:'Fraunces',serif;font-weight:600;font-size:2rem;line-height:1.12;letter-spacing:-.02em;color:var(--tinta);margin-bottom:10px}
+  .meta-mod{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--grafito-2);margin-bottom:28px;letter-spacing:.03em}
+  .meta-mod .pip{color:var(--oro);margin:0 9px}
+
+  .cuerpo h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.32rem;color:var(--tinta);margin:34px 0 10px;letter-spacing:-.01em}
+  .cuerpo p{margin-bottom:15px;color:var(--grafito)}
+  .cuerpo strong{color:var(--tinta);font-weight:600}
+  .cuerpo ul{margin:0 0 15px 2px;padding-left:20px}
+  .cuerpo li{margin-bottom:8px}
+  .lead{font-size:1.08rem;color:var(--grafito-2)}
+
+  .box{border-radius:12px;padding:18px 20px;margin:20px 0;font-size:.95rem}
+  .box-titulo{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+  .box.clave{background:#FBF6EA;border:1px solid #EAD9AE}
+  .box.clave .box-titulo{color:#9C7A28}
+  .box.ejemplo{background:#F3F5F8;border:1px solid #DCE3EC}
+  .box.ejemplo .box-titulo{color:#3F5374}
+  .box.porque{background:var(--verde-suave);border:1px solid #BFDDD5}
+  .box.porque .box-titulo{color:#1F6354}
+  .box p:last-child{margin-bottom:0}
+  .box .num{font-family:'JetBrains Mono',monospace;color:var(--tinta)}
+
+  /* ---------- Quiz ---------- */
+  .quiz{margin-top:40px;border-top:1px solid var(--linea);padding-top:32px}
+  .quiz-cab{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.18em;color:var(--oro);text-transform:uppercase;margin-bottom:18px}
+  .preg{margin-bottom:24px}
+  .preg-txt{font-weight:600;color:var(--tinta);margin-bottom:12px;font-size:1rem}
+  .preg-txt .qn{font-family:'JetBrains Mono',monospace;color:var(--oro);margin-right:8px;font-size:.85rem}
+  .opcion{
+    display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;cursor:pointer;
+    background:var(--papel-pura);border:1px solid var(--linea);border-radius:10px;
+    padding:12px 15px;margin-bottom:8px;color:var(--grafito);font-size:.94rem;
+    transition:border-color .14s ease,background .14s ease;font-family:inherit;line-height:1.4;
+  }
+  .opcion:hover:not(:disabled){border-color:var(--oro)}
+  .opcion:focus-visible{outline:2px solid var(--oro);outline-offset:1px}
+  .opcion .marca-op{
+    font-family:'JetBrains Mono',monospace;font-size:.72rem;min-width:21px;height:21px;border-radius:5px;
+    border:1px solid var(--linea);display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    color:var(--grafito-2);margin-top:1px;transition:all .14s ease;
+  }
+  .opcion.sel{border-color:var(--oro);background:#FCF8EE}
+  .opcion.sel .marca-op{background:var(--oro);border-color:var(--oro);color:#fff}
+  .opcion.correcta{border-color:var(--verde);background:var(--verde-suave)}
+  .opcion.correcta .marca-op{background:var(--verde);border-color:var(--verde);color:#fff}
+  .opcion.incorrecta{border-color:var(--rojo);background:var(--rojo-suave)}
+  .opcion.incorrecta .marca-op{background:var(--rojo);border-color:var(--rojo);color:#fff}
+  .opcion:disabled{cursor:default}
+
+  .explica{font-size:.9rem;color:var(--grafito-2);padding:11px 15px;margin-top:2px;border-left:2px solid var(--oro);background:#FAFAF7;border-radius:0 8px 8px 0;display:none}
+  .explica.ver{display:block}
+  .explica b{color:var(--tinta)}
+
+  .quiz-acc{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:8px}
+  .btn{
+    font-family:'Inter',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;
+    border-radius:9px;padding:11px 22px;border:1px solid transparent;transition:all .15s ease;
+  }
+  .btn-oro{background:var(--oro);color:#fff}
+  .btn-oro:hover{background:#b88f3c}
+  .btn-oro:disabled{background:#D9CBA6;cursor:not-allowed}
+  .btn-linea{background:none;border-color:var(--linea);color:var(--grafito)}
+  .btn-linea:hover{border-color:var(--tinta);color:var(--tinta)}
+  .btn:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}
+  .resultado{font-family:'JetBrains Mono',monospace;font-size:.84rem;font-weight:500}
+  .resultado .pts{color:var(--verde);font-size:1.05rem}
+
+  /* ---------- Navegación inferior ---------- */
+  .pie-nav{display:flex;justify-content:space-between;gap:14px;margin-top:36px}
+  .pie-btn{
+    flex:1;background:var(--tinta);border:1px solid var(--tinta-3);border-radius:12px;
+    padding:15px 18px;cursor:pointer;text-align:left;transition:all .15s ease;color:var(--tinta-claro);
+    min-width:0;
+  }
+  .pie-btn:hover{border-color:var(--oro);background:var(--tinta-2)}
+  .pie-btn:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
+  .pie-btn.der{text-align:right}
+  .pie-btn:disabled{opacity:.32;cursor:default}
+  .pie-dir{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.14em;color:var(--tinta-tenue);text-transform:uppercase}
+  .pie-tit{font-size:.9rem;font-weight:500;color:var(--papel);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* ---------- Inicio ---------- */
+  .hero-stats{display:flex;gap:14px;flex-wrap:wrap;margin:26px 0 4px}
+  .stat{background:var(--tinta);border:1px solid var(--tinta-3);border-radius:13px;padding:17px 20px;flex:1;min-width:130px}
+  .stat-n{font-family:'Fraunces',serif;font-weight:600;font-size:1.9rem;color:var(--oro-claro);line-height:1}
+  .stat-l{font-size:.76rem;color:var(--tinta-tenue);margin-top:6px}
+
+  .metodo{margin:34px 0}
+  .paso{display:flex;gap:16px;padding:15px 0;border-bottom:1px solid var(--linea)}
+  .paso:last-child{border-bottom:none}
+  .paso-n{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--oro);font-size:.85rem;min-width:26px}
+  .paso-t{font-weight:600;color:var(--tinta);margin-bottom:2px}
+  .paso-d{font-size:.92rem;color:var(--grafito-2)}
+
+  .grid-mod{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  .mc{
+    background:var(--papel-pura);border:1px solid var(--linea);border-radius:13px;padding:18px 19px;
+    cursor:pointer;text-align:left;transition:all .15s ease;position:relative;
+  }
+  .mc:hover{border-color:var(--oro);transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,33,58,.07)}
+  .mc:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
+  .mc-num{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--oro);letter-spacing:.06em}
+  .mc-check{position:absolute;top:16px;right:16px;width:19px;height:19px;border-radius:5px;background:var(--verde);color:#fff;display:none;align-items:center;justify-content:center;font-size:.7rem}
+  .mc.hecho .mc-check{display:flex}
+  .mc-t{font-family:'Fraunces',serif;font-weight:600;font-size:1.12rem;color:var(--tinta);margin:7px 0 5px;line-height:1.2}
+  .mc-d{font-size:.85rem;color:var(--grafito-2);line-height:1.45}
+  .mc-area{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--grafito-2);margin-top:10px;letter-spacing:.04em;text-transform:uppercase}
+
+  .prox{display:flex;gap:13px;align-items:flex-start;padding:13px 0;border-bottom:1px dashed var(--linea)}
+  .prox:last-child{border-bottom:none}
+  .prox-dot{width:7px;height:7px;border-radius:99px;border:1.5px solid var(--oro);margin-top:7px;flex-shrink:0}
+  .prox-t{font-weight:600;color:var(--tinta);font-size:.95rem}
+  .prox-d{font-size:.86rem;color:var(--grafito-2)}
+
+  .fuente{display:block;padding:11px 0;border-bottom:1px solid var(--linea);color:var(--grafito);font-size:.9rem}
+  .fuente:last-child{border-bottom:none}
+  .fuente b{color:var(--tinta)}
+  .fuente .mono{color:var(--oro);font-size:.78rem}
+
+  .nota{font-size:.8rem;color:var(--grafito-2);background:#F3F5F8;border:1px solid var(--linea);border-radius:10px;padding:14px 16px;margin-top:24px;line-height:1.5}
+
+  /* ---------- Drawer overlay ---------- */
+  .overlay{display:none}
+
+  @media (max-width:880px){
+    .app{grid-template-columns:1fr}
+    .sidebar{
+      position:fixed;left:0;top:0;width:300px;max-width:86vw;z-index:60;
+      transform:translateX(-100%);transition:transform .25s ease;
+    }
+    body.menu-abierto .sidebar{transform:translateX(0)}
+    .overlay{display:block;position:fixed;inset:0;background:rgba(8,14,28,.5);z-index:50;opacity:0;pointer-events:none;transition:opacity .25s ease}
+    body.menu-abierto .overlay{opacity:1;pointer-events:auto}
+    .topbar{
+      display:flex;align-items:center;gap:13px;position:sticky;top:0;z-index:30;
+      background:var(--tinta);border-bottom:1px solid var(--tinta-3);padding:13px 18px;
+    }
+    .tb-btn{background:var(--tinta-2);border:1px solid var(--tinta-3);border-radius:8px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--papel);flex-shrink:0}
+    .tb-btn:focus-visible{outline:2px solid var(--oro)}
+    .tb-titulo{font-family:'Fraunces',serif;font-weight:600;color:var(--papel);font-size:1.05rem}
+    .tb-sub{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.14em;color:var(--oro);text-transform:uppercase}
+    .content{padding:24px 18px 70px}
+    .card{padding:26px 22px;border-radius:13px}
+    h1.tit{font-size:2rem}
+    h2.tit{font-size:1.6rem}
+    .grid-mod{grid-template-columns:1fr}
+    .pie-nav{flex-direction:column}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  }
+</style>
+</head>
+<body>
+  <div class="overlay" id="overlay" onclick="cerrarMenu()"></div>
+
+  <div class="topbar">
+    <button class="tb-btn" id="tbBtn" aria-label="Abrir ruta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div>
+      <div class="tb-sub">Serie 7 + Serie 66</div>
+      <div class="tb-titulo">Ruta de Inversiones</div>
+    </div>
+  </div>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="content">
+      <div class="pane" id="pane"></div>
+    </main>
+  </div>
+
+<script>
+/* ============================================================
+   CONTENIDO DE LA RUTA
+   ============================================================ */
+const RUTA = [
+  {
+    id:"m1", num:"01", titulo:"Cómo funciona el mercado",
+    resumen:"Qué compras realmente, dónde se compra y quién participa.",
+    area:"Base · SIE / Serie 7", min:8,
+    cuerpo:`
+      <p class="lead">Antes de invertir un dólar conviene entender qué estás comprando y en qué lugar. Casi todo lo demás se construye sobre esto.</p>
+
+      <h3>Qué compras cuando inviertes</h3>
+      <p>Existen dos grandes familias de valores (en inglés, <em>securities</em>):</p>
+      <ul>
+        <li><strong>Acción (stock):</strong> un pedazo de propiedad de una empresa. Si tienes acciones de una empresa, eres dueño de una fracción de ella. Ganas si la empresa vale más o reparte dividendos; pierdes si vale menos.</li>
+        <li><strong>Bono (bond):</strong> un préstamo que tú le haces a una empresa o a un gobierno. Ellos te devuelven el dinero en una fecha pactada y, mientras tanto, te pagan intereses. No eres dueño: eres acreedor.</li>
+      </ul>
+      <div class="box clave"><div class="box-titulo">▸ Concepto clave</div><p>Acción = <strong>propiedad</strong> (riesgo y premio más altos). Bono = <strong>préstamo</strong> (más predecible, premio más bajo). Esta sola distinción explica el 80% de las decisiones de un inversionista.</p></div>
+
+      <h3>Mercado primario y mercado secundario</h3>
+      <p>El <strong>mercado primario</strong> es cuando el valor nace: la empresa emite acciones por primera vez (una <span class="mono">IPO</span>) y el dinero va a la empresa. El <strong>mercado secundario</strong> es donde tú y yo compramos y vendemos entre nosotros después; ahí el dinero va de un inversionista a otro, no a la empresa.</p>
+      <p>Ese mercado secundario son las <strong>bolsas</strong>: NYSE y Nasdaq son las dos grandes en Estados Unidos. Cuando abres una app y compras una acción, casi siempre estás en el mercado secundario.</p>
+
+      <h3>Quién está en la mesa</h3>
+      <ul>
+        <li><strong>Emisores:</strong> empresas y gobiernos que necesitan capital.</li>
+        <li><strong>Broker-dealers:</strong> las firmas por donde pasan las órdenes (tu casa de bolsa).</li>
+        <li><strong>Creadores de mercado (market makers):</strong> dan liquidez; siempre ofrecen un precio de compra y uno de venta.</li>
+        <li><strong>Reguladores:</strong> la <strong>SEC</strong> (gobierno federal) y <strong>FINRA</strong> (autorregulador de la industria) vigilan el juego. NASAA agrupa a los reguladores estatales.</li>
+      </ul>
+
+      <h3>Cómo se forma el precio</h3>
+      <p>El precio sale de la oferta y la demanda en tiempo real. Verás dos números: el <strong>bid</strong> (lo máximo que alguien paga ahora) y el <strong>ask</strong> (lo mínimo que alguien acepta para vender). La diferencia entre ambos es el <em>spread</em>. No hay un "precio justo" fijo: hay el precio que alguien está dispuesto a pagar en este segundo.</p>
+
+      <div class="box porque"><div class="box-titulo">◆ Por qué te importa</div><p>Cuando entiendes que una acción es propiedad y un bono es deuda, dejas de ver el mercado como un casino y empiezas a verlo como lo que es: un lugar para poner tu dinero a trabajar en negocios reales y en deuda real.</p></div>
+    `,
+    quiz:[
+      {p:"Compras una acción de una empresa en tu app de inversión un martes cualquiera. ¿En qué mercado estás operando?",
+       op:["Mercado primario, porque el dinero va a la empresa","Mercado secundario, porque compras a otro inversionista","No es un mercado regulado","Mercado de bonos"],
+       r:1, ex:"Una IPO (primario) ocurre una vez y el dinero va a la empresa. La compraventa diaria entre inversionistas ocurre en el <b>mercado secundario</b> (las bolsas)."},
+      {p:"¿Cuál de estas afirmaciones describe correctamente un bono?",
+       op:["Te da propiedad sobre la empresa","Es un préstamo: eres acreedor y te pagan intereses","Siempre rinde más que una acción","No tiene fecha de vencimiento"],
+       r:1, ex:"Un bono es deuda. Prestas dinero, te lo devuelven en una fecha y te pagan intereses (cupón) mientras tanto. <b>No</b> eres dueño de la empresa."},
+      {p:"En una cotización ves bid 49.90 y ask 50.05. ¿Qué significa el ask?",
+       op:["El precio más alto al que alguien quiere comprar","El precio más bajo al que alguien acepta vender","La comisión del broker","El precio de cierre de ayer"],
+       r:1, ex:"El <b>ask</b> es el mínimo al que un vendedor acepta vender; el <b>bid</b> es el máximo que un comprador paga. La diferencia (0.15) es el spread."}
+    ]
+  },
+
+  {
+    id:"m2", num:"02", titulo:"Riesgo y rendimiento",
+    resumen:"La ley fundamental: no hay premio sin riesgo. Y el tiempo es tu aliado.",
+    area:"Economía · Serie 66", min:9,
+    cuerpo:`
+      <p class="lead">Si solo te llevas una idea de toda esta ruta, que sea esta: el rendimiento que esperas y el riesgo que asumes están atados. Quien te ofrezca premio alto sin riesgo, miente.</p>
+
+      <h3>La relación riesgo–rendimiento</h3>
+      <p>Para que valga la pena prestar tu dinero a algo riesgoso, exiges que te paguen más. Por eso un bono del gobierno de EE.UU. (muy seguro) paga poco, y una acción pequeña y volátil <em>podría</em> pagar mucho — o hacerte perder. El "podría" es el riesgo.</p>
+
+      <h3>Los tipos de riesgo que debes conocer</h3>
+      <ul>
+        <li><strong>Riesgo de mercado (sistemático):</strong> cuando cae todo el mercado a la vez (una recesión, una crisis). No lo eliminas diversificando.</li>
+        <li><strong>Riesgo específico (no sistemático):</strong> que <em>una</em> empresa concreta tenga problemas. Este <strong>sí</strong> se reduce diversificando.</li>
+        <li><strong>Riesgo de inflación (poder adquisitivo):</strong> que tu dinero compre menos con el tiempo. Tener todo en efectivo no es "seguro": pierde valor cada año.</li>
+        <li><strong>Riesgo de tasa de interés:</strong> afecta sobre todo a los bonos (lo verás en el módulo 04).</li>
+        <li><strong>Riesgo de crédito:</strong> que quien te debe no pague.</li>
+        <li><strong>Riesgo de liquidez:</strong> no poder vender rápido sin malbaratar.</li>
+      </ul>
+      <div class="box clave"><div class="box-titulo">▸ Concepto clave</div><p>El riesgo <strong>específico</strong> se diversifica (no pongas todo en una empresa). El riesgo de <strong>mercado</strong> no: por eso necesitas un horizonte de tiempo para aguantar las caídas.</p></div>
+
+      <h3>El interés compuesto: tu mejor empleado</h3>
+      <p>Compuesto significa que ganas rendimiento sobre tu rendimiento. No crece en línea recta, crece como bola de nieve. El tiempo hace casi todo el trabajo.</p>
+      <div class="box ejemplo"><div class="box-titulo">▸ Ejemplo</div><p>Inviertes <span class="num">$10,000</span> a un <span class="num">8%</span> anual promedio y no tocas nada:<br>• A 10 años: ≈ <span class="num">$21,600</span><br>• A 20 años: ≈ <span class="num">$46,600</span><br>• A 30 años: ≈ <span class="num">$100,600</span><br>Duplicaste el plazo de 10 a 20 años, pero el resultado más que se duplicó. Eso es lo compuesto.</p></div>
+
+      <h3>Tu horizonte de tiempo cambia todo</h3>
+      <p>Dinero que necesitas el año que viene no debería estar en acciones: no hay tiempo para recuperarte de una caída. Dinero que no tocarás en 15 o 20 años puede asumir mucho más riesgo, porque el tiempo suaviza la volatilidad.</p>
+
+      <div class="box porque"><div class="box-titulo">◆ Por qué te importa</div><p>Antes de elegir <em>en qué</em> invertir, define <em>cuándo</em> necesitas el dinero. El horizonte es lo primero que define cuánto riesgo te conviene — más que tu intuición sobre el mercado.</p></div>
+    `,
+    quiz:[
+      {p:"Tienes una cartera con 40 empresas distintas de muchos sectores. Llega una recesión global y cae todo. ¿Qué riesgo te golpeó?",
+       op:["Riesgo específico, que se diversifica","Riesgo de mercado (sistemático), que no se diversifica","Riesgo de liquidez","Riesgo de crédito"],
+       r:1, ex:"Diversificar elimina el riesgo de <b>una</b> empresa (específico), pero no protege de una caída general: ese es el riesgo de <b>mercado</b> o sistemático."},
+      {p:"Tu tía guarda todos sus ahorros en efectivo bajo el colchón 'para no arriesgar'. ¿A qué riesgo está MÁS expuesta?",
+       op:["Riesgo de mercado","Riesgo de inflación (pérdida de poder adquisitivo)","Riesgo de tasa de interés","A ninguno, el efectivo es 100% seguro"],
+       r:1, ex:"El efectivo parece seguro pero pierde poder de compra cada año por la inflación. 'No arriesgar' nominalmente sí arriesga tu poder adquisitivo real."},
+      {p:"¿Por qué $10,000 a 30 años rinde mucho más que el doble de lo que rinde a 15 años, con la misma tasa?",
+       op:["Porque suben las tasas con el tiempo","Por el interés compuesto: ganas rendimiento sobre el rendimiento acumulado","Porque pagas menos impuestos","Por casualidad estadística"],
+       r:1, ex:"El compuesto reinvierte tus ganancias, así que la base crece cada año. El crecimiento se acelera con el tiempo; no es lineal."}
+    ]
+  },
+
+  {
+    id:"m3", num:"03", titulo:"Acciones a fondo",
+    resumen:"Comunes, preferentes, dividendos y cómo se valora una empresa.",
+    area:"Renta variable · Serie 7", min:8,
+    cuerpo:`
+      <p class="lead">Las acciones son el motor de crecimiento de casi cualquier cartera de largo plazo. Vale la pena saber qué te dan y qué no te garantizan.</p>
+
+      <h3>Comunes vs. preferentes</h3>
+      <ul>
+        <li><strong>Acciones comunes (common):</strong> las típicas. Te dan voto en la empresa y todo el potencial de subida. Si la empresa quiebra, eres el último en la fila para cobrar.</li>
+        <li><strong>Acciones preferentes (preferred):</strong> normalmente sin voto, pero pagan un dividendo fijo y cobran antes que las comunes si hay problemas. Se parecen más a un bono que a una acción común.</li>
+      </ul>
+
+      <h3>Dividendos: un reparto, no una promesa</h3>
+      <p>Un <strong>dividendo</strong> es una parte de las ganancias que la empresa reparte a sus dueños, normalmente cada trimestre. Punto crítico: <strong>los dividendos de acciones comunes no están garantizados</strong>. La empresa puede subirlos, bajarlos o eliminarlos. Otra forma de devolver valor es la <em>recompra de acciones</em> (buyback), que reduce el número de acciones en circulación.</p>
+      <div class="box clave"><div class="box-titulo">▸ Concepto clave</div><p>Como accionista común tienes derecho <strong>residual</strong>: cobras lo que queda <em>después</em> de empleados, proveedores, acreedores y preferentes. Más riesgo, pero también todo el potencial de crecimiento.</p></div>
+
+      <h3>Cómo se mira el valor (sin volverte analista)</h3>
+      <p>No necesitas valuar empresas como un profesional, pero conviene reconocer una medida: el <strong>P/E</strong> (precio / utilidad). Indica cuántos dólares pagas por cada dólar de ganancia anual de la empresa. Un P/E alto suele significar que el mercado espera mucho crecimiento; uno bajo, lo contrario o desconfianza. Es una pista, no un veredicto.</p>
+      <div class="box ejemplo"><div class="box-titulo">▸ Ejemplo</div><p>Una empresa cuesta <span class="num">$50</span> por acción y gana <span class="num">$2.50</span> por acción al año. Su P/E es <span class="num">50 / 2.50 = 20</span>. Pagas 20 veces sus ganancias anuales. ¿Es caro? Depende de cuánto crezca y de cómo cotizan empresas parecidas.</p></div>
+
+      <h3>El trato del accionista</h3>
+      <p>A cambio de aceptar volatilidad (las acciones suben y bajan con fuerza), históricamente las acciones han sido la clase de activo que más ha crecido en plazos largos. La clave es el plazo: en un año puede pasar cualquier cosa; en veinte, el tiempo juega a tu favor.</p>
+
+      <div class="box porque"><div class="box-titulo">◆ Por qué te importa</div><p>Saber que un dividendo no es garantía y que eres el último en cobrar te vacuna contra dos errores: perseguir dividendos altísimos sin mirar la salud de la empresa, y concentrar tu patrimonio en una sola acción "segura".</p></div>
+    `,
+    quiz:[
+      {p:"Una empresa atraviesa un mal trimestre y elimina su dividendo. Tenías acciones COMUNES contando con ese ingreso. ¿Qué principio ignoraste?",
+       op:["Que las comunes tienen voto","Que el dividendo de comunes no está garantizado y puede recortarse","Que las preferentes no pagan dividendo","Que los dividendos suben siempre"],
+       r:1, ex:"Los dividendos de acciones comunes son discrecionales: la empresa puede subirlos, bajarlos o eliminarlos. Nunca cuentes con ellos como ingreso fijo."},
+      {p:"Si una empresa quiebra, ¿en qué orden cobra un accionista COMÚN?",
+       op:["Primero, antes que los acreedores","Último, después de acreedores y preferentes (derecho residual)","Al mismo nivel que los bonistas","No cobra nunca nada"],
+       r:1, ex:"El accionista común tiene derecho <b>residual</b>: cobra lo que queda al final. Por eso asume más riesgo — y recibe todo el potencial de crecimiento."},
+      {p:"Una acción vale $80 y gana $4 por acción al año. ¿Cuál es su P/E?",
+       op:["20","4","320","2"],
+       r:0, ex:"P/E = precio / utilidad por acción = 80 / 4 = <b>20</b>. Estás pagando 20 veces la ganancia anual por acción."}
+    ]
+  },
+
+  {
+    id:"m4", num:"04", titulo:"Bonos y renta fija",
+    resumen:"La parte estable de la cartera. Y la relación que más confunde: precio vs. tasas.",
+    area:"Renta fija · Serie 7", min:10,
+    cuerpo:`
+      <p class="lead">Los bonos son el contrapeso de las acciones: dan estabilidad e ingreso predecible. Entender una sola regla —cómo se mueve su precio con las tasas— te pone por delante de la mayoría.</p>
+
+      <h3>Anatomía de un bono</h3>
+      <ul>
+        <li><strong>Valor par (principal):</strong> lo que te devuelven al final, normalmente <span class="mono">$1,000</span> por bono.</li>
+        <li><strong>Cupón:</strong> el interés que te pagan, casi siempre fijo. Un cupón de 5% sobre $1,000 paga $50 al año.</li>
+        <li><strong>Vencimiento:</strong> la fecha en que te devuelven el principal.</li>
+      </ul>
+
+      <h3>La regla de oro: precio y tasas van en sentido contrario</h3>
+      <p>Cuando las tasas de interés del mercado <strong>suben</strong>, el precio de los bonos que ya existen <strong>baja</strong>. Y al revés. ¿Por qué? Porque tu bono viejo paga un cupón fijo; si ahora salen bonos nuevos que pagan más, nadie querrá el tuyo al mismo precio, así que su precio baja hasta que resulte competitivo.</p>
+      <div class="box ejemplo"><div class="box-titulo">▸ Ejemplo</div><p>Compras un bono que paga <span class="num">5%</span> ($50 al año). Después, las tasas suben y los bonos nuevos pagan <span class="num">7%</span>. Tu bono de 5% ahora es menos atractivo, así que para venderlo tendrás que bajar su precio por debajo de $1,000. Mismo cupón, menos precio.</p></div>
+      <div class="box clave"><div class="box-titulo">▸ Concepto clave</div><p>Tasas ↑ → precio del bono ↓. Tasas ↓ → precio del bono ↑. Cuanto más largo el vencimiento, más fuerte ese efecto (eso se llama <em>duración</em>).</p></div>
+
+      <h3>Los tres tipos que debes conocer</h3>
+      <ul>
+        <li><strong>Del Tesoro (Treasuries):</strong> emitidos por el gobierno de EE.UU. Los más seguros; pagan menos. Los intereses están libres de impuesto estatal.</li>
+        <li><strong>Corporativos:</strong> emitidos por empresas. Pagan más porque tienen más riesgo de crédito.</li>
+        <li><strong>Municipales (munis):</strong> emitidos por estados y ciudades. Su gran atractivo: los intereses suelen estar <strong>libres de impuesto federal</strong> (y a veces estatal). Esto importa más mientras más alto es tu nivel de impuestos.</li>
+      </ul>
+
+      <h3>Los riesgos del "activo seguro"</h3>
+      <p>Los bonos no son libres de riesgo: <strong>riesgo de tasa</strong> (su precio cae si suben las tasas), <strong>riesgo de crédito</strong> (que el emisor no pague), y <strong>riesgo de reinversión</strong> (que al vencer tengas que reinvertir a tasas más bajas).</p>
+
+      <div class="box porque"><div class="box-titulo">◆ Por qué te importa</div><p>Tú ya trabajas con impuestos: la ventaja fiscal de los munis y los Treasuries es información directamente útil. Y entender por qué un bono "bajó" cuando subieron las tasas evita que vendas con pánico algo que, si esperas al vencimiento, te devuelve tu principal completo.</p></div>
+    `,
+    quiz:[
+      {p:"Las tasas de interés del mercado suben de golpe. ¿Qué le pasa al precio de los bonos que ya tenías?",
+       op:["Sube, porque ahora valen más","Baja, porque los bonos nuevos pagan más y el tuyo se vuelve menos atractivo","No cambia, el cupón es fijo","Se duplica"],
+       r:1, ex:"Precio y tasas van en sentido contrario. Si salen bonos nuevos con mejor cupón, el precio del tuyo baja hasta volverse competitivo. La duración mide qué tan fuerte es ese golpe."},
+      {p:"Tienes un nivel de impuestos alto y buscas ingreso. ¿Qué bono tiene una ventaja fiscal típica que deberías evaluar?",
+       op:["Corporativo de alto rendimiento","Bono municipal (intereses suelen estar libres de impuesto federal)","Bono basura","Ninguno tiene ventaja fiscal"],
+       r:1, ex:"Los <b>municipales</b> suelen pagar intereses libres de impuesto federal. Cuanto más alto tu nivel impositivo, más valioso es ese beneficio frente a un bono gravable."},
+      {p:"¿Qué función cumplen principalmente los bonos dentro de una cartera bien armada?",
+       op:["Maximizar el crecimiento a largo plazo","Dar estabilidad e ingreso, amortiguando la volatilidad de las acciones","Eliminar todos los riesgos","Sustituir por completo a las acciones"],
+       r:1, ex:"Los bonos son el contrapeso: aportan estabilidad e ingreso y suavizan las caídas de la parte de acciones. No son el motor de crecimiento."}
+    ]
+  },
+
+  {
+    id:"m5", num:"05", titulo:"Fondos mutuos y ETFs",
+    resumen:"Diversificación instantánea en un solo instrumento — y por qué los costos deciden.",
+    area:"Productos · Serie 7", min:9,
+    cuerpo:`
+      <p class="lead">Para la mayoría de las personas, los fondos son la forma más sensata de invertir: compras cientos de empresas o bonos de una sola vez, sin tener que elegir uno por uno.</p>
+
+      <h3>Qué es un fondo</h3>
+      <p>Un fondo junta el dinero de muchos inversionistas y lo invierte en una canasta de valores. Al comprar una participación, eres dueño de un pedacito de <em>toda</em> la canasta. Así obtienes diversificación al instante: si una empresa cae, es solo una fracción de cientos.</p>
+
+      <h3>Fondo mutuo vs. ETF</h3>
+      <ul>
+        <li><strong>Fondo mutuo (mutual fund):</strong> se compra y vende <strong>una vez al día</strong>, al precio de cierre. Práctico para aportar montos fijos cada mes.</li>
+        <li><strong>ETF (fondo cotizado):</strong> se compra y vende <strong>durante todo el día</strong> en la bolsa, como una acción. Suele tener costos más bajos y ventajas fiscales.</li>
+      </ul>
+
+      <h3>Indexado vs. gestión activa</h3>
+      <ul>
+        <li><strong>Fondo indexado:</strong> simplemente copia un índice (por ejemplo, el S&P 500). No intenta ganarle al mercado; intenta <em>ser</em> el mercado. Costos muy bajos.</li>
+        <li><strong>Fondo de gestión activa:</strong> un gestor elige qué comprar buscando superar al mercado. Cobra más, y la mayoría no le gana al índice de forma consistente en plazos largos.</li>
+      </ul>
+
+      <h3>El costo es el factor que más controlas</h3>
+      <p>No puedes controlar el rendimiento del mercado, pero <strong>sí</strong> controlas cuánto pagas. El costo principal es el <strong>expense ratio</strong> (porcentaje anual que descuenta el fondo). También existen <em>cargas</em> (loads), comisiones de entrada o salida que conviene evitar.</p>
+      <div class="box ejemplo"><div class="box-titulo">▸ Ejemplo</div><p>Dos fondos rinden lo mismo, pero uno cobra <span class="num">0.05%</span> y otro <span class="num">1.00%</span> al año. Sobre <span class="num">$100,000</span> a 30 años, esa diferencia de costo se puede comer <span class="num">decenas de miles de dólares</span> de tu resultado final. El costo no parece mucho hoy; compuesto, es enorme.</p></div>
+      <div class="box clave"><div class="box-titulo">▸ Concepto clave</div><p>A largo plazo, un fondo indexado de bajo costo y amplia diversificación supera a la mayoría de las alternativas más caras. Lo aburrido suele ganar.</p></div>
+
+      <div class="box porque"><div class="box-titulo">◆ Por qué te importa</div><p>Si inviertes para ti, los fondos te quitan la presión de "adivinar la empresa correcta". Tu trabajo cambia de <em>elegir ganadores</em> a <em>elegir bajo costo, amplia diversificación y mantener el rumbo</em>. Es más simple y, en promedio, más efectivo.</p></div>
+    `,
+    quiz:[
+      {p:"Quieres aportar $500 cada mes de forma automática a una canasta amplia del mercado, sin operar durante el día. ¿Qué encaja mejor?",
+       op:["Una sola acción individual","Un fondo (indexado de bajo costo) que te da cientos de empresas en un instrumento","Un bono corporativo","Opciones"],
+       r:1, ex:"Un fondo te da diversificación inmediata y permite aportes automáticos. Para la mayoría, un indexado amplio de bajo costo es la base ideal."},
+      {p:"¿Cuál es la diferencia operativa clave entre un fondo mutuo y un ETF?",
+       op:["El ETF no diversifica","El fondo mutuo se negocia una vez al día al cierre; el ETF se negocia todo el día como una acción","El fondo mutuo no cobra nada","El ETF solo invierte en bonos"],
+       r:1, ex:"El fondo mutuo se liquida una vez al día al precio de cierre; el ETF cotiza en bolsa durante toda la sesión y suele tener menor costo."},
+      {p:"Dos fondos rinden igual, pero uno cobra 1.00% y otro 0.05% anual. A 30 años sobre un monto grande, ¿qué impacto tiene esa diferencia?",
+       op:["Casi ninguno, es muy poco","Enorme: el costo compuesto puede restar decenas de miles al resultado final","Solo importa el primer año","El más caro siempre rinde más"],
+       r:1, ex:"El costo también se compone. Una diferencia que parece pequeña hoy puede costarte una fortuna a 30 años. Por eso el costo es lo primero que debes mirar."}
+    ]
+  },
+
+  {
+    id:"m6", num:"06", titulo:"Construir tu cartera",
+    resumen:"Lo más valioso para ti: diversificación, asignación de activos y disciplina.",
+    area:"Estrategia · Serie 66", min:10,
+    cuerpo:`
+      <p class="lead">Aquí está el corazón de invertir para uno mismo. No se trata de adivinar la próxima acción ganadora, sino de armar una mezcla que aguante el tiempo y tus nervios.</p>
+
+      <h3>Diversificación y correlación</h3>
+      <p>Diversificar es no poner todo en una sola cosa. Pero lo importante es <em>cómo</em>: lo ideal es combinar activos que no se muevan igual al mismo tiempo (baja <strong>correlación</strong>). Cuando las acciones caen, los bonos suelen aguantar mejor; juntos, tu cartera tiembla menos que cualquiera por separado.</p>
+      <div class="box clave"><div class="box-titulo">▸ Concepto clave</div><p>Diversificar bien no es tener "muchas cosas", es tener cosas que <strong>no suben y bajan al unísono</strong>. Eso reduce el riesgo sin sacrificar tanto rendimiento.</p></div>
+
+      <h3>Asignación de activos: la decisión que más pesa</h3>
+      <p>La <strong>asignación de activos</strong> es cómo repartes tu dinero entre acciones, bonos y efectivo. Esta decisión explica la mayor parte del comportamiento de tu cartera — más que qué acción concreta elijas. Se define a partir de dos cosas del módulo 02: tu <strong>horizonte de tiempo</strong> y tu <strong>tolerancia al riesgo</strong>.</p>
+      <div class="box ejemplo"><div class="box-titulo">▸ Ejemplo (solo ilustrativo)</div><p>• Horizonte largo y estómago fuerte → más peso en acciones.<br>• Horizonte corto o aversión a las caídas → más peso en bonos y efectivo.<br>No hay una fórmula mágica única: hay la mezcla que tú puedas <em>sostener</em> sin vender en pánico.</p></div>
+
+      <h3>Dos hábitos que hacen casi todo el trabajo</h3>
+      <ul>
+        <li><strong>Aporte constante (dollar-cost averaging):</strong> invertir un monto fijo cada mes, pase lo que pase. Compras más participaciones cuando está barato y menos cuando está caro, y dejas de intentar "adivinar el momento".</li>
+        <li><strong>Rebalanceo:</strong> cada cierto tiempo, regresas la cartera a tu mezcla objetivo. Si las acciones subieron mucho y se pasaron de tu objetivo, vendes un poco y compras lo rezagado. Te obliga a vender caro y comprar barato de forma sistemática.</li>
+      </ul>
+
+      <h3>Dos medidas que oirás</h3>
+      <ul>
+        <li><strong>Beta:</strong> cuánto se mueve algo respecto al mercado. Beta 1 = se mueve igual; beta 1.5 = exagera los movimientos; beta 0.5 = se mueve la mitad.</li>
+        <li><strong>Desviación estándar:</strong> qué tan "brincos" son los rendimientos. Más alta = más volátil. Es una forma numérica de medir el riesgo.</li>
+      </ul>
+
+      <div class="box porque"><div class="box-titulo">◆ Por qué te importa</div><p>Para invertir para ti no necesitas ser adivino del mercado. Necesitas una asignación adecuada a tu plazo, aportes automáticos y rebalanceo. Esos tres hábitos, sostenidos por años, superan a casi todo el "trading" inteligente.</p></div>
+    `,
+    quiz:[
+      {p:"¿Qué hace que la diversificación realmente reduzca el riesgo?",
+       op:["Tener el mayor número posible de acciones","Combinar activos con baja correlación, que no suban y bajen al mismo tiempo","Comprar solo lo que más ha subido","Poner todo en un solo sector fuerte"],
+       r:1, ex:"No es cantidad, es <b>correlación</b>. Mezclar cosas que se mueven distinto (acciones + bonos) hace que la cartera tiemble menos que sus partes por separado."},
+      {p:"El mercado sube mucho y ahora tu cartera tiene más acciones de las que querías. El rebalanceo te dice que:",
+       op:["Compres aún más acciones porq van subiendo","Vendas parte de lo que subió y compres lo rezagado para volver a tu mezcla objetivo","No hagas nada nunca","Vendas todo y te salgas"],
+       r:1, ex:"Rebalancear te regresa a tu objetivo: vendes lo que se pasó (caro) y compras lo rezagado (barato). Es disciplina automática contra la emoción."},
+      {p:"¿Cuál es la idea central del aporte constante (dollar-cost averaging)?",
+       op:["Esperar el momento perfecto para invertir todo de golpe","Invertir un monto fijo cada periodo sin intentar adivinar el momento del mercado","Comprar solo cuando el mercado cae","Vender cada vez que sube"],
+       r:1, ex:"Inviertes lo mismo cada mes pase lo que pase. Compras más barato cuando baja y menos caro cuando sube, y dejas de depender de cronometrar el mercado."}
+    ]
+  },
+
+  {
+    id:"m7", num:"07", titulo:"Impuestos y cuentas",
+    resumen:"Dónde guardas la inversión cambia cuánto te queda. Tu terreno.",
+    area:"Fiscal · Serie 7 / 66", min:9,
+    cuerpo:`
+      <p class="lead">Esto conecta directo con lo que ya dominas. No basta con elegir buenas inversiones: el tipo de cuenta donde las pones puede cambiar miles de dólares en impuestos a lo largo de tu vida.</p>
+
+      <h3>Cuentas con ventaja fiscal vs. cuenta normal</h3>
+      <ul>
+        <li><strong>Cuenta gravable (brokerage normal):</strong> flexible, sin límites de aporte, pero pagas impuestos sobre ganancias y dividendos cada año que los realizas.</li>
+        <li><strong>Cuentas con ventaja fiscal:</strong> el gobierno te premia por ahorrar para el retiro difiriendo o eliminando impuestos. Estas son las protagonistas.</li>
+      </ul>
+
+      <h3>Las tres cuentas de retiro clave</h3>
+      <ul>
+        <li><strong>401(k):</strong> a través del empleador. Aportas antes de impuestos (baja tu ingreso gravable hoy) y pagas impuesto al retirar en el retiro. Muchos empleadores aportan un <em>match</em> — dinero gratis.</li>
+        <li><strong>IRA tradicional:</strong> versión individual. Aportas (posiblemente deducible) ahora y pagas impuesto al retirar.</li>
+        <li><strong>Roth IRA:</strong> aportas con dinero <em>ya gravado</em>, pero todo lo que crece y lo que retiras en el retiro sale <strong>libre de impuestos</strong>. Muy potente si esperas estar en un nivel de impuestos similar o mayor más adelante.</li>
+      </ul>
+      <div class="box clave"><div class="box-titulo">▸ Concepto clave</div><p>La pregunta de fondo: ¿prefieres el beneficio fiscal <strong>hoy</strong> (tradicional / 401k) o <strong>mañana</strong> (Roth)? Tradicional = no pagas ahora, pagas después. Roth = pagas ahora, no pagas después.</p></div>
+
+      <h3>Ganancias de capital: corto vs. largo plazo</h3>
+      <p>Cuando vendes una inversión con ganancia en una cuenta gravable, el plazo cambia el impuesto:</p>
+      <ul>
+        <li><strong>Corto plazo (1 año o menos):</strong> se grava como ingreso ordinario — la tasa más alta.</li>
+        <li><strong>Largo plazo (más de 1 año):</strong> tasas preferenciales, bastante más bajas.</li>
+      </ul>
+      <div class="box ejemplo"><div class="box-titulo">▸ Ejemplo</div><p>Misma ganancia de <span class="num">$10,000</span>. Si vendes a los 11 meses, tributa como ingreso ordinario. Si esperas a pasar el año, califica para tasa de ganancia de capital a largo plazo, normalmente mucho menor. A veces, esperar unas semanas cambia tu factura fiscal.</p></div>
+
+      <h3>Dividendos y "ubicación de activos"</h3>
+      <p>Los <strong>dividendos calificados</strong> pagan tasas preferenciales; los <strong>ordinarios</strong> pagan como ingreso normal. Y existe la idea de <strong>asset location</strong>: poner las inversiones menos eficientes fiscalmente dentro de cuentas con ventaja, y dejar las más eficientes en la cuenta gravable.</p>
+
+      <div class="box porque"><div class="box-titulo">◆ Por qué te importa</div><p>Tú ya entiendes impuestos mejor que la mayoría. Esto te da el puente entre tu mundo fiscal y el de inversiones: la misma inversión, en la cuenta correcta y con el plazo correcto, te deja quedarte con mucho más de lo que ganas.</p></div>
+    `,
+    quiz:[
+      {p:"Compraste una inversión y tienes una buena ganancia a los 11 meses. ¿Qué consideración fiscal aparece si vendes ahora vs. esperar?",
+       op:["No cambia nada, el impuesto es el mismo siempre","Vender a ≤1 año se grava como ingreso ordinario; pasar el año califica para tasa de largo plazo, más baja","A menos tiempo, menos impuesto","Las ganancias nunca pagan impuesto"],
+       r:1, ex:"Ganancia de corto plazo (≤1 año) = tasa ordinaria (alta). Largo plazo (>1 año) = tasas preferenciales. El plazo de tenencia cambia directamente tu factura."},
+      {p:"La diferencia esencial entre una IRA tradicional y una Roth IRA es:",
+       op:["La Roth no permite invertir en fondos","Tradicional: beneficio fiscal hoy y pagas al retirar. Roth: pagas hoy y los retiros en el retiro salen libres de impuesto","La tradicional es siempre mejor","No hay diferencia real"],
+       r:1, ex:"Tradicional difiere el impuesto a después; Roth lo paga ahora pero el crecimiento y los retiros en el retiro son libres de impuestos. Es 'beneficio hoy vs. beneficio mañana'."},
+      {p:"Tu empleador ofrece un 'match' en el 401(k). ¿Por qué suele convenir aprovecharlo primero?",
+       op:["Porque obliga a no invertir","Porque es esencialmente dinero adicional gratis sobre tu aporte","Porque elimina todos los impuestos para siempre","Porque garantiza ganancias en el mercado"],
+       r:1, ex:"El match es aporte del empleador encima del tuyo: rendimiento inmediato sobre tu dinero. Dejarlo sobre la mesa es renunciar a dinero gratis."}
+    ]
+  },
+
+  {
+    id:"m8", num:"08", titulo:"Define tus reglas y evita fraudes",
+    resumen:"La parte de ética y protección, aplicada a ti: tu perfil y cómo detectar estafas.",
+    area:"Ética y protección · Serie 66", min:9,
+    cuerpo:`
+      <p class="lead">Los exámenes dedican mucho a la conducta del asesor hacia su cliente. Para ti tiene un giro útil: tú eres el cliente y el asesor. Aplícate las mismas reglas y aprende a oler una estafa.</p>
+
+      <h3>Hazte el cuestionario de idoneidad (a ti mismo)</h3>
+      <p>Un buen asesor, antes de recomendar nada, levanta el <strong>perfil del inversionista</strong>. Hazlo tú contigo:</p>
+      <ul>
+        <li><strong>Objetivo:</strong> ¿para qué es este dinero? (retiro, casa, ingreso, crecimiento)</li>
+        <li><strong>Horizonte:</strong> ¿cuándo lo necesitas? (esto define el riesgo, módulo 02)</li>
+        <li><strong>Tolerancia al riesgo:</strong> ¿qué tanta caída aguantas sin vender en pánico? Sé honesto, no optimista.</li>
+        <li><strong>Liquidez:</strong> ¿cuánto efectivo necesitas a la mano para emergencias antes de invertir el resto?</li>
+        <li><strong>Situación fiscal:</strong> tu nivel de impuestos cambia qué cuentas y productos te convienen.</li>
+      </ul>
+      <div class="box clave"><div class="box-titulo">▸ Concepto clave</div><p>El estándar más alto de la industria es el <strong>deber fiduciario</strong>: actuar en el mejor interés del cliente, no en el del vendedor. Cuando inviertes para ti, sé tu propio fiduciario: decisiones por tu interés, no por el entusiasmo del momento.</p></div>
+
+      <h3>Lo que un buen asesor NUNCA hace (y tú tampoco deberías tolerar)</h3>
+      <ul>
+        <li><strong>Prometer rendimientos:</strong> nadie puede garantizar un rendimiento de mercado. Prohibido.</li>
+        <li><strong>Operar de más (churning):</strong> mover la cuenta solo para generar comisiones.</li>
+        <li><strong>Recomendar lo inadecuado:</strong> productos que no encajan con tu perfil.</li>
+        <li><strong>Esconder costos o conflictos de interés.</strong></li>
+      </ul>
+
+      <h3>Señales de fraude — apréndetelas de memoria</h3>
+      <ul>
+        <li><strong>"Rendimiento garantizado" o "sin riesgo" con cifras altas:</strong> imposible. Bandera roja número uno.</li>
+        <li><strong>Presión y urgencia:</strong> "es hoy o nunca", "cupo limitado". Las buenas inversiones no caducan en una tarde.</li>
+        <li><strong>"Exclusivo / secreto / solo para ti":</strong> táctica de manipulación.</li>
+        <li><strong>Esquema Ponzi:</strong> pagan a los viejos con dinero de los nuevos. Colapsa siempre.</li>
+        <li><strong>Fraude de afinidad:</strong> el estafador se gana la confianza de una comunidad (paisanos, iglesia, gremio) para entrar. Muy relevante: la confianza no sustituye la verificación.</li>
+      </ul>
+      <div class="box ejemplo"><div class="box-titulo">▸ Verifica antes de entregar un dólar</div><p>• <span class="num">BrokerCheck</span> de FINRA (brokercheck.finra.org): historial de corredores y firmas.<br>• <span class="num">IAPD</span> (adviserinfo.sec.gov): historial de asesores de inversión.<br>Si alguien evita ser verificado o no aparece, esa es tu respuesta.</p></div>
+
+      <div class="box porque"><div class="box-titulo">◆ Por qué te importa</div><p>La habilidad más rentable de un inversionista no es elegir la mejor acción: es <strong>no perder el capital en una estafa</strong>. Definir tus reglas por escrito y verificar a todos te protege de los dos enemigos más caros — tus emociones y los estafadores.</p></div>
+    `,
+    quiz:[
+      {p:"Alguien de confianza de tu comunidad te ofrece una inversión con 'rendimiento garantizado del 3% mensual, sin riesgo'. ¿Qué haces?",
+       op:["Entrar rápido antes de que se llene el cupo","Reconocer banderas rojas (rendimiento garantizado + sin riesgo + cifras altas) y verificar en BrokerCheck/IAPD antes de nada","Confiar porque es de la comunidad","Pedir que te garanticen 4%"],
+       r:1, ex:"Rendimiento garantizado, 'sin riesgo' y cifras altas son señales clásicas de fraude. El fraude de afinidad usa la confianza de la comunidad: verifica siempre, la confianza no sustituye la verificación."},
+      {p:"Antes de invertir, ¿cuál de estos define cuánto riesgo te conviene de forma más directa?",
+       op:["El consejo del vecino","Tu horizonte de tiempo y tu tolerancia honesta a las caídas","Lo que más ha subido este mes","La marca del producto"],
+       r:1, ex:"Tu perfil —sobre todo horizonte y tolerancia real al riesgo— define la asignación adecuada. Es el mismo cuestionario de idoneidad que un buen asesor te haría."},
+      {p:"¿Qué es un esquema Ponzi?",
+       op:["Una inversión legítima de alto rendimiento","Un fraude que paga a inversionistas antiguos con el dinero de los nuevos, hasta colapsar","Un tipo de fondo indexado","Un bono del gobierno"],
+       r:1, ex:"El Ponzi no genera rendimientos reales: usa el dinero de nuevos inversionistas para pagar a los viejos. Siempre termina colapsando cuando deja de entrar dinero fresco."}
+    ]
+  }
+];
+
+const PROXIMOS = [
+  {t:"Opciones (calls y puts)", d:"Cómo funcionan los contratos, su uso para cobertura y por qué amplifican el riesgo. Conceptual, sin tecnicismos de operador."},
+  {t:"Análisis fundamental vs. técnico", d:"Leer una empresa por sus números (fundamental) vs. leer el comportamiento del precio (técnico). Para qué sirve cada uno."},
+  {t:"Anualidades y productos seguro-inversión", d:"Puente directo con tu mundo de seguros: fijas, variables, indexadas; cuándo tienen sentido y cuándo no."},
+  {t:"Municipales a fondo", d:"Tipos de munis, rendimiento equivalente gravable y cómo compararlos con bonos gravables según tu nivel de impuestos."},
+  {t:"Retiro: acumulación y distribución", d:"Cómo pasar de juntar dinero a retirarlo de forma sostenible, RMDs y orden de retiro entre cuentas."},
+  {t:"REITs y activos alternativos", d:"Bienes raíces cotizados y otros activos para diversificar más allá de acciones y bonos."}
+];
+
+const FUENTES = [
+  {t:"FINRA — Series 7 Content Outline (PDF)", d:"El temario oficial y gratuito del Serie 7, directo de la fuente.", u:"finra.org"},
+  {t:"NASAA — Series 66 Content Outline", d:"Temario oficial del Serie 66 (combina Serie 63 + Serie 65).", u:"nasaa.org"},
+  {t:"FINRA — SIE (Securities Industry Essentials)", d:"El examen base gratuito de fundamentos. La mejor puerta de entrada conceptual.", u:"finra.org"},
+  {t:"Investor.gov (SEC)", d:"Educación al inversionista del gobierno de EE.UU. Tiene contenido en español y calculadoras.", u:"investor.gov"},
+  {t:"BrokerCheck (FINRA) e IAPD (SEC)", d:"Para verificar el historial de cualquier corredor o asesor antes de confiarle dinero.", u:"brokercheck.finra.org"}
+];
+
+/* ============================================================
+   ESTADO Y PERSISTENCIA
+   ============================================================ */
+let progreso = {};
+let vista = "inicio"; // "inicio" o id de módulo
+const CLAVE_STORE = "ruta-inversiones-progreso";
+// Guarda el progreso donde sea que se abra el archivo:
+// dentro de Claude (window.storage), en tu navegador descargado/en Vercel (localStorage),
+// o en memoria si nada de eso existe.
+const hayClaude = (typeof window !== "undefined" && window.storage && typeof window.storage.get === "function");
+let hayLocal = false;
+try{
+  if(typeof window !== "undefined" && window.localStorage){
+    window.localStorage.setItem("__t","1"); window.localStorage.removeItem("__t"); hayLocal = true;
+  }
+}catch(e){ hayLocal = false; }
+
+async function cargarProgreso(){
+  if(hayClaude){
+    try{ const r = await window.storage.get(CLAVE_STORE); if(r && r.value){ progreso = JSON.parse(r.value) || {}; } }catch(e){}
+    return;
+  }
+  if(hayLocal){
+    try{ const v = window.localStorage.getItem(CLAVE_STORE); if(v){ progreso = JSON.parse(v) || {}; } }catch(e){}
+  }
+}
+async function guardarProgreso(){
+  if(hayClaude){
+    try{ await window.storage.set(CLAVE_STORE, JSON.stringify(progreso)); }catch(e){}
+    return;
+  }
+  if(hayLocal){
+    try{ window.localStorage.setItem(CLAVE_STORE, JSON.stringify(progreso)); }catch(e){}
+  }
+}
+
+function modIndex(id){ return RUTA.findIndex(m=>m.id===id); }
+function completados(){ return RUTA.filter(m=>progreso[m.id] && progreso[m.id].hecho).length; }
+function pctGlobal(){ return Math.round((completados()/RUTA.length)*100); }
+
+/* ============================================================
+   RENDER: SIDEBAR
+   ============================================================ */
+function renderSidebar(){
+  const pct = pctGlobal();
+  let nav = "";
+  RUTA.forEach(m=>{
+    const st = progreso[m.id]||{};
+    const cls = "nav-item" + (vista===m.id?" activo":"") + (st.hecho?" hecho":"");
+    const metaTxt = st.hecho ? (st.score+"/"+st.total+" · "+m.min+" min") : (m.min+" min");
+    nav += '<button class="'+cls+'" onclick="ir(\''+m.id+'\')">'
+         +   '<span class="ni-num">'+(st.hecho?'✓':m.num)+'</span>'
+         +   '<span class="ni-cuerpo"><span class="ni-titulo">'+m.titulo+'</span>'
+         +   '<span class="ni-meta">'+metaTxt+'</span></span>'
+         + '</button>';
+  });
+
+  document.getElementById("sidebar").innerHTML =
+    '<div class="marca"><span class="marca-logo">Ruta</span><span class="marca-sub">de inversiones</span></div>'
+  + '<div class="marca-tag">Aprender a invertir · base Serie 7 + Serie 66</div>'
+  + '<div class="barra-global">'
+  +   '<div class="barra-global-top"><span class="barra-global-lab">Tu avance</span>'
+  +   '<span class="barra-global-val">'+completados()+'/'+RUTA.length+' · '+pct+'%</span></div>'
+  +   '<div class="barra-track"><div class="barra-fill" style="width:'+pct+'%"></div></div>'
+  + '</div>'
+  + '<button class="nav-inicio'+(vista==="inicio"?" activo":"")+'" onclick="ir(\'inicio\')">'
+  +   '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Inicio y método'
+  + '</button>'
+  + '<div class="nav-sec">La ruta · 8 módulos</div>'
+  + nav;
+}
+
+/* ============================================================
+   RENDER: INICIO
+   ============================================================ */
+function renderInicio(){
+  let cards = "";
+  RUTA.forEach(m=>{
+    const hecho = progreso[m.id] && progreso[m.id].hecho;
+    cards += '<button class="mc'+(hecho?' hecho':'')+'" onclick="ir(\''+m.id+'\')">'
+          +   '<span class="mc-check">✓</span>'
+          +   '<span class="mc-num">MÓDULO '+m.num+'</span>'
+          +   '<div class="mc-t">'+m.titulo+'</div>'
+          +   '<div class="mc-d">'+m.resumen+'</div>'
+          +   '<div class="mc-area">'+m.area+'</div>'
+          + '</button>';
+  });
+
+  let pasos = [
+    ["1","Un módulo por sesión, en orden","Cada módulo se apoya en el anterior. Lee con calma; no hay prisa ni examen real que aprobar."],
+    ["2","Lee, luego responde el quiz","Al final de cada módulo hay preguntas con explicación. No es para calificarte: es para fijar el concepto."],
+    ["3","Aplica algo pequeño","Después de cada módulo, da un paso real: define tu horizonte, mira un fondo indexado real, calcula tu perfil de riesgo."],
+    ["4","Repasa lo anterior","Antes de avanzar, recuerda en una frase lo del módulo previo. La repetición espaciada es lo que hace que se quede."],
+    ["5","Profundiza en la fuente oficial","Cuando quieras el detalle fino, baja a los temarios gratuitos de FINRA y NASAA al final de esta página."]
+  ];
+  let pasosHtml = "";
+  pasos.forEach(p=> pasosHtml += '<div class="paso"><div class="paso-n">'+p[0]+'</div><div><div class="paso-t">'+p[1]+'</div><div class="paso-d">'+p[2]+'</div></div></div>');
+
+  let prox = "";
+  PROXIMOS.forEach(p=> prox += '<div class="prox"><span class="prox-dot"></span><div><div class="prox-t">'+p.t+'</div><div class="prox-d">'+p.d+'</div></div></div>');
+
+  let fnt = "";
+  FUENTES.forEach(f=> fnt += '<div class="fuente"><b>'+f.t+'</b> — '+f.d+' <span class="mono">'+f.u+'</span></div>');
+
+  document.getElementById("pane").innerHTML =
+    '<div class="card anim">'
+  + '<div class="eyebrow">Ruta de estudio · Serie 7 + Serie 66</div>'
+  + '<h1 class="tit">Aprender a invertir, para ti</h1>'
+  + '<p class="lead">Esta ruta toma lo realmente útil de las licencias Serie 7 y Serie 66 y lo traduce a lo que necesitas para invertir tu propio dinero. No es preparación para un examen: es cultura financiera aplicada, en orden y sin relleno.</p>'
+
+  + '<div class="hero-stats">'
+  +   '<div class="stat"><div class="stat-n">8</div><div class="stat-l">módulos en secuencia</div></div>'
+  +   '<div class="stat"><div class="stat-n">'+completados()+'</div><div class="stat-l">completados por ti</div></div>'
+  +   '<div class="stat"><div class="stat-n">~70</div><div class="stat-l">min de lectura total</div></div>'
+  + '</div>'
+
+  + '<div class="nota">Una aclaración honesta: las licencias Serie 7 y Serie 66 son exámenes en inglés que requieren patrocinio de una firma y sirven para asesorar a terceros. Tú no necesitas presentarlos para invertir para ti. Esta ruta usa <em>su temario</em> como mapa del conocimiento, traducido al español y curado para el inversionista individual.</div>'
+
+  + '<h2 class="tit" style="margin-top:40px">El método</h2>'
+  + '<div class="metodo">'+pasosHtml+'</div>'
+
+  + '<h2 class="tit" style="margin-top:36px">La ruta</h2>'
+  + '<p style="color:var(--grafito-2);margin-bottom:18px">Toca cualquier módulo para empezar. Tu avance se guarda solo.</p>'
+  + '<div class="grid-mod">'+cards+'</div>'
+
+  + '<h2 class="tit" style="margin-top:42px">Lo que sigue</h2>'
+  + '<p style="color:var(--grafito-2);margin-bottom:14px">Estos temas extienden la ruta. Pídelos cuando quieras y los desarrollo con el mismo formato.</p>'
+  + prox
+
+  + '<h2 class="tit" style="margin-top:42px">Fuentes oficiales gratuitas</h2>'
+  + '<p style="color:var(--grafito-2);margin-bottom:14px">Para ir al detalle cuando quieras profundizar.</p>'
+  + fnt
+
+  + '<div class="nota" style="margin-top:30px">Este material es educativo y de cultura general. No es asesoría de inversión personalizada ni una recomendación para comprar o vender ningún producto. Las decisiones sobre tu dinero son tuyas.</div>'
+  + '</div>';
+}
+
+/* ============================================================
+   RENDER: MÓDULO
+   ============================================================ */
+function renderModulo(id){
+  const m = RUTA[modIndex(id)];
+  const i = modIndex(id);
+  const prev = i>0 ? RUTA[i-1] : null;
+  const next = i<RUTA.length-1 ? RUTA[i+1] : null;
+
+  let quizHtml = '<div class="quiz"><div class="quiz-cab">Comprueba lo que entendiste</div>';
+  m.quiz.forEach((q,qi)=>{
+    let ops = "";
+    q.op.forEach((o,oi)=>{
+      const letra = String.fromCharCode(65+oi);
+      ops += '<button class="opcion" data-q="'+qi+'" data-o="'+oi+'" onclick="elegir(\''+id+'\','+qi+','+oi+')">'
+           +   '<span class="marca-op">'+letra+'</span><span>'+o+'</span></button>';
+    });
+    quizHtml += '<div class="preg" id="preg-'+qi+'">'
+             +    '<div class="preg-txt"><span class="qn">'+(qi+1)+'.</span>'+q.p+'</div>'
+             +    ops
+             +    '<div class="explica" id="ex-'+qi+'"></div>'
+             +  '</div>';
+  });
+  quizHtml += '<div class="quiz-acc">'
+           +    '<button class="btn btn-oro" id="btnComprobar" onclick="comprobar(\''+id+'\')" disabled>Comprobar respuestas</button>'
+           +    '<span class="resultado" id="resultado"></span>'
+           +  '</div></div>';
+
+  let pie = '<div class="pie-nav">';
+  if(prev){ pie += '<button class="pie-btn" onclick="ir(\''+prev.id+'\')"><div class="pie-dir">← Anterior</div><div class="pie-tit">'+prev.titulo+'</div></button>'; }
+  else { pie += '<button class="pie-btn" disabled><div class="pie-dir">← Anterior</div><div class="pie-tit">Inicio de la ruta</div></button>'; }
+  if(next){ pie += '<button class="pie-btn der" onclick="ir(\''+next.id+'\')"><div class="pie-dir">Siguiente →</div><div class="pie-tit">'+next.titulo+'</div></button>'; }
+  else { pie += '<button class="pie-btn der" onclick="ir(\'inicio\')"><div class="pie-dir">Terminaste →</div><div class="pie-tit">Volver al inicio</div></button>'; }
+  pie += '</div>';
+
+  document.getElementById("pane").innerHTML =
+    '<div class="card anim">'
+  + '<div class="eyebrow">Módulo '+m.num+' · '+m.area+'</div>'
+  + '<h1 class="tit">'+m.titulo+'</h1>'
+  + '<div class="meta-mod"><span class="mono">'+m.min+' min de lectura</span><span class="pip">•</span><span class="mono">'+m.quiz.length+' preguntas</span></div>'
+  + '<div class="cuerpo">'+m.cuerpo+'</div>'
+  + quizHtml
+  + '</div>'
+  + pie;
+
+  // restaurar selección previa si ya estaba contestado
+  seleccion = {};
+  comprobado = false;
+}
+
+/* ============================================================
+   LÓGICA DEL QUIZ
+   ============================================================ */
+let seleccion = {};
+let comprobado = false;
+
+function elegir(id, qi, oi){
+  if(comprobado) return;
+  seleccion[qi] = oi;
+  // marcar visualmente
+  document.querySelectorAll('.opcion[data-q="'+qi+'"]').forEach(b=>{
+    b.classList.toggle('sel', parseInt(b.dataset.o)===oi);
+  });
+  const m = RUTA[modIndex(id)];
+  const btn = document.getElementById("btnComprobar");
+  if(Object.keys(seleccion).length === m.quiz.length){ btn.disabled = false; }
+}
+
+function comprobar(id){
+  const m = RUTA[modIndex(id)];
+  if(Object.keys(seleccion).length < m.quiz.length) return;
+  comprobado = true;
+  let aciertos = 0;
+  m.quiz.forEach((q,qi)=>{
+    const elegida = seleccion[qi];
+    document.querySelectorAll('.opcion[data-q="'+qi+'"]').forEach(b=>{
+      const oi = parseInt(b.dataset.o);
+      b.disabled = true;
+      b.classList.remove('sel');
+      if(oi===q.r){ b.classList.add('correcta'); }
+      else if(oi===elegida){ b.classList.add('incorrecta'); }
+    });
+    const ok = (elegida===q.r);
+    if(ok) aciertos++;
+    const ex = document.getElementById("ex-"+qi);
+    ex.innerHTML = (ok?'<b>Correcto. </b>':'<b>Revisa esto. </b>') + q.ex;
+    ex.classList.add('ver');
+  });
+
+  const res = document.getElementById("resultado");
+  res.innerHTML = 'Resultado: <span class="pts">'+aciertos+'/'+m.quiz.length+'</span>';
+  document.getElementById("btnComprobar").disabled = true;
+  document.getElementById("btnComprobar").textContent = "Respuestas comprobadas";
+
+  // guardar progreso (queda como completado al comprobar)
+  progreso[id] = { hecho:true, score:aciertos, total:m.quiz.length };
+  guardarProgreso();
+  renderSidebar();
+}
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+function ir(destino){
+  vista = destino;
+  cerrarMenu();
+  if(destino==="inicio"){ renderInicio(); }
+  else { renderModulo(destino); }
+  renderSidebar();
+  window.scrollTo({top:0, behavior:"smooth"});
+  document.querySelector(".content").scrollTop = 0;
+}
+
+function abrirMenu(){ document.body.classList.add("menu-abierto"); }
+function cerrarMenu(){ document.body.classList.remove("menu-abierto"); }
+
+document.getElementById("tbBtn").addEventListener("click", ()=>{
+  document.body.classList.toggle("menu-abierto");
+});
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
+(async function init(){
+  await cargarProgreso();
+  renderSidebar();
+  renderInicio();
+})();
+</script>
+</body>
+</html>
